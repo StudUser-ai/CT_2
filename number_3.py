@@ -1,6 +1,6 @@
 import numpy as np
 from math import sin, cos
-x0 = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+x0 = [1.1, 0.1, 1.1, 0.1, 1.1, 0.1, 1.1, 0.1, 1.1, 0.1]
 eps = 0.000001
 np.random.seed(42)
 
@@ -36,7 +36,7 @@ def norm(x):
     return res
 
 
-def wolfe_search(x_k, p_k, max_iter = 150, eps=0.0000001):
+def wolfe_search(x_k, p_k, max_iter = 1000, eps=0.000001):
     delta_1 = 0.35
     delta_3 = 0.65
     np.random.seed(69)
@@ -52,8 +52,11 @@ def wolfe_search(x_k, p_k, max_iter = 150, eps=0.0000001):
         i += 1
         f_k1 = function(x_k + tau * p_k)
         g_k1 = grad(x_k + tau * p_k)
+        # cond_2 = delta_3 * np.dot(g_k.transpose(), p_k) - np.dot(g_k1.transpose(), p_k) <= eps
+        # cond_1 = f_k1 - f_k - delta_1 * np.dot(g_k.transpose(), p_k) * tau <= eps
+
         cond_2 = delta_3 * np.dot(g_k, p_k) - np.dot(g_k1, p_k) <= eps
-        cond_1 = f_k1 - f_k + delta_1 * np.dot(g_k.transpose(), p_k) * tau <= eps
+        cond_1 = f_k1 - f_k - delta_1 * np.dot(g_k.transpose(), p_k) * tau <= eps
         if not cond_1: # cond_1 is violated
             t_r = tau
             tau = (1 - teta_2) * t_l + teta_2 * t_r
@@ -70,13 +73,11 @@ def wolfe_search(x_k, p_k, max_iter = 150, eps=0.0000001):
 
 def davidon_fletcher_powell(x0, eps=0.001):
     x = x0.copy()
-    H = np.eye(10)
+    H = np.identity(10)
     k = 0
     g = grad(x)
-    while norm(grad(x)) > eps and k < 10:
-        # print(x)
+    while norm(grad(x)) > eps and k < 50:
         d = np.dot(-H, g)
-        print(d)
         tau_k = wolfe_search(x, d)
         x_new = x + tau_k * d
         g_new = grad(x_new)
@@ -96,3 +97,4 @@ print("Number of iterations:", numb_of_iter)
 print("Point of optimum:", point_of_optimum)
 print("Value of function at point of optimum:", function(point_of_optimum))
 
+# Peculiar answer, maybe an unlucky initialization parameters
